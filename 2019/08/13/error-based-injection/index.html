@@ -196,12 +196,12 @@
                 <h1 id="MySQL报错注入"><a href="#MySQL报错注入" class="headerlink" title="MySQL报错注入"></a>MySQL报错注入</h1><p>这篇文章以sqli-labs-master平台的第17关Less17来说明报错注入的，这里主要讲解常见的三种报错注入方式，这种三种报错注入使用的报错注入函数分别为：floor()、updatexml()和extractvalue()。</p>
 <hr>
 <p>首先，我介绍一下Less17的情况，这一关是用update查询语句来重置用户密码的，打开less17页面后显示如下。</p>
-<p><img src="/.io//1.png" alt="pic1"></p>
+<p><img src="error-based-injection/1.png" alt="pic1"></p>
 <p>查看源代码发现后端对User Name的输入内容进行比较严格的过滤，所以我们选择在New Password的输入框中输入Payload。已知某一个用户为admin，其密码也为admin，所以我在两个输入框均输入admin，然后通过开启burp suite抓包再点击Submit按钮，得到如下请求包：</p>
-<img src="/.io//08/13/error-based-injection/2.png" title="pic2">
+<img src="/2019/08/13/error-based-injection/2.png" title="pic2">
 
 <p>由上可见，这里使用的post请求方式，post部分内容分别使用了uname、passwd和submit三个变量来提交数据，放行后页面如下，表示修改重置密码成功。</p>
-<p><img src="/.io//3.png" alt="pic3"></p>
+<p><img src="error-based-injection/3.png" alt="pic3"></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$update=&quot;UPDATE users SET password = &apos;$passwd&apos; WHERE username=&apos;$row1&apos;&quot;;</span><br></pre></td></tr></table></figure>
 
 <p>上面是源代码中的SQL查询语句，对于update（或delete/insert）语句，我们可以通过<strong>or</strong>或者<strong>and</strong>布尔关键字衔接报错注入语句来构造一句完整的payload。</p>
@@ -231,9 +231,9 @@
 <h4 id="updatexml-的常规报错用法"><a href="#updatexml-的常规报错用法" class="headerlink" title="updatexml()的常规报错用法"></a>updatexml()的常规报错用法</h4><p><strong>payload ：</strong></p>
 <p> <em>‘ or updatexml(1,concat(‘#’,<strong>(select version() )</strong>,’#’),0)#</em></p>
 <p>下图使用火狐浏览器的插件Hackbar来提交post数据：</p>
-<p><img src="/.io//4.png" alt="pic4"></p>
+<p><img src="error-based-injection/4.png" alt="pic4"></p>
 <p>如下图，页面报错结果为：XPATH syntax error: ‘#5.5.53’。</p>
-<p><img src="/.io//5.png" alt="pic5"></p>
+<p><img src="error-based-injection/5.png" alt="pic5"></p>
 <p>上面的payload是updatexml报错注入的常规模型，只需把加粗部分的内容改成想查看的数据的查询语句就能爆出想要的表中数据。</p>
 <hr>
 <p>这里要插入<strong>子查询</strong>和<strong>派生表</strong>的概念。<strong>子查询</strong>有两种：一是WHERE子查询；二是FROM子查询，而FROM这种子查询又被称为<strong>派生表</strong>。</p>
@@ -241,7 +241,7 @@
 <p><strong>payload1:</strong> </p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or updatexml(1,concat(&apos;#&apos;,(select concat(id,&apos;#&apos;,username,&apos;#&apos;,password) from users limit 0,1)),0)#</span><br></pre></td></tr></table></figure>
 
-<p><img src="/.io//6.png" alt="pic6"></p>
+<p><img src="error-based-injection/6.png" alt="pic6"></p>
 <p>结果：You can’t specify target table ‘users’ for update in FROM clause</p>
 <p>这里我试图查询users表中的id、username和password的第一行数据，但这里却弹出错误提醒。</p>
 <p>原因：根据报错意思，不能指定FROM子句中的users表来作为要UPDATE的表。完整的SQL语句如下：</p>
@@ -251,7 +251,7 @@
 <p> <strong>payload2:</strong></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or updatexml(1,concat(&apos;#&apos;,(select * from (select concat_ws(&apos;#&apos;,id,username,password) from users limit 0,1) a),&apos;#),0)#</span><br></pre></td></tr></table></figure>
 
-<p><img src="/.io//7.png" alt="pic7"></p>
+<p><img src="error-based-injection/7.png" alt="pic7"></p>
 <p>结果：XPATH syntax error: ‘#1#Dumb#Dumb’，成功爆出数据（上面使用concat_ws()和concat()都可以）</p>
 <p>解释：这里的<strong>a</strong>：<strong>(select concat_ws(‘#’,id,username,password) from users limit 0,1)</strong>就是<strong>派生表</strong>，而select * from a就相当于查询a语句本身结果的内容。</p>
 <p>即“select concat_ws(‘#’,id,username,password) from users limit 0,1”等价于 “select * from a”。</p>
