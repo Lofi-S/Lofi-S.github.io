@@ -198,7 +198,7 @@
 <p>首先，我介绍一下Less17的情况，这一关是用update查询语句来重置用户密码的，打开less17页面后显示如下。</p>
 <p><img src="/.io//1.png" alt="pic1"></p>
 <p>查看源代码发现后端对User Name的输入内容进行比较严格的过滤，所以我们选择在New Password的输入框中输入Payload。已知某一个用户为admin，其密码也为admin，所以我在两个输入框均输入admin，然后通过开启burp suite抓包再点击Submit按钮，得到如下请求包：</p>
-
+<img src="/.io//08/13/error-based-injection/2.png" title="pic2">
 
 <p>由上可见，这里使用的post请求方式，post部分内容分别使用了uname、passwd和submit三个变量来提交数据，放行后页面如下，表示修改重置密码成功。</p>
 <p><img src="/.io//3.png" alt="pic3"></p>
