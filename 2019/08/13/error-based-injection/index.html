@@ -193,16 +193,17 @@
 
             <!-- Post Main Content -->
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                <h1 id="MySQL报错注入"><a href="#MySQL报错注入" class="headerlink" title="MySQL报错注入"></a>MySQL报错注入</h1><p>这篇文章以sqli-labs-master平台的第17关Less17来说明报错注入的，这里主要讲解常见的三种报错注入方式，这种三种报错注入使用的报错注入函数分别为：floor()、updatexml()和extractvalue()。</p>
+                <h1 id="MySQL报错注入"><a href="#MySQL报错注入" class="headerlink" title="MySQL报错注入"></a>MySQL报错注入</h1><p><em>SQLi-Labs</em>是一个学习SQL注入平台,该平台包含了不同GET和POST的注入场景，这篇文章以sqli-labs平台的第17关Less17来讲解报错注入，这里主要讲解常见的三种报错注入方式，这种三种报错注入使用的报错注入函数分别为：floor( )、updatexml( )和extractvalue( )。</p>
+<p>【注意】<strong>报错注入对MySQL的版本是有要求的，本文使用的是5.5.53版本</strong></p>
 <hr>
 <p>首先，我介绍一下Less17的情况，这一关是用update查询语句来重置用户密码的，打开less17页面后显示如下。</p>
-<img src="/2019/08/13/error-based-injection/1.png" title="pic1">
+<img src="/2019/08/13/error-based-injection/1_1.png" title="pic1">
 
 <p>查看源代码发现后端对User Name的输入内容进行比较严格的过滤，所以我们选择在New Password的输入框中输入Payload。已知某一个用户为admin，其密码也为admin，所以我在两个输入框均输入admin，然后通过开启burp suite抓包再点击Submit按钮，得到如下请求包：</p>
-<img src="/2019/08/13/error-based-injection/2.png" title="pic2">
+<img src="/2019/08/13/error-based-injection/1_2.png" title="pic2">
 
 <p>由上可见，这里使用的post请求方式，post部分内容分别使用了uname、passwd和submit三个变量来提交数据，放行后页面如下，表示修改重置密码成功。</p>
-<img src="/2019/08/13/error-based-injection/3.png" title="pic3">
+<img src="/2019/08/13/error-based-injection/1_3.png" title="pic3">
 
 
 
@@ -210,7 +211,7 @@
 
 <p>上面是源代码中的SQL查询语句，对于update（或delete/insert）语句，我们可以通过<strong>or</strong>或者<strong>and</strong>布尔关键字衔接报错注入语句来构造一句完整的payload。</p>
 <hr>
-<h3 id="下面来介绍三种报错注入函数的原理及其使用："><a href="#下面来介绍三种报错注入函数的原理及其使用：" class="headerlink" title="下面来介绍三种报错注入函数的原理及其使用："></a>下面来介绍三种报错注入函数的原理及其使用：</h3><h4 id="1、updatexml-xml-target-xpath-expr-new-xml"><a href="#1、updatexml-xml-target-xpath-expr-new-xml" class="headerlink" title="1、updatexml(xml_target,xpath_expr,new_xml)"></a>1、updatexml(xml_target,xpath_expr,new_xml)</h4><table>
+<h3 id="下面来介绍三种报错注入函数的原理及其使用："><a href="#下面来介绍三种报错注入函数的原理及其使用：" class="headerlink" title="下面来介绍三种报错注入函数的原理及其使用："></a>下面来介绍三种报错注入函数的原理及其使用：</h3><h3 id="1、updatexml-xml-target-xpath-expr-new-xml"><a href="#1、updatexml-xml-target-xpath-expr-new-xml" class="headerlink" title="1、updatexml(xml_target,xpath_expr,new_xml)"></a>1、updatexml(xml_target,xpath_expr,new_xml)</h3><table>
 <thead>
 <tr>
 <th><strong>参数</strong></th>
@@ -219,7 +220,7 @@
 </thead>
 <tbody><tr>
 <td>xml_target</td>
-<td>目标xml，形式类似于节点目录</td>
+<td>目标xml，形式类似节点目录</td>
 </tr>
 <tr>
 <td>xpath_expr</td>
@@ -231,14 +232,14 @@
 </tr>
 </tbody></table>
 <p>作用：这是一个MySQL对xml文档数据进行查询和修改的函数。其实就是用new_xml把xml_target中包含xpath_expr的部分节点（包括xml_target的节点）替换掉。（具体不懂没关系，见下面的报错原理）</p>
-<p>报错原理：updatexml()中第二个参数必须是xpath语法格式，若使用该函数时该参数不符合xpath格式则会报错，提示我们输入的内容有错，如 <em>XPATH syntax error:’xxx（第二个参数的内容）’</em> 。所以我们可以在第二个参数输入我们想要查询的数据来进行报错注入。</p>
+<p>报错原理：updatexml( )中第二个参数必须是xpath语法格式，若使用该函数时该参数不符合xpath格式则会报错，提示我们输入的内容有错，如 <em>XPATH syntax error:’xxx（第二个参数的内容）’</em> 。所以我们可以在第二个参数输入我们想要查询的数据来进行报错注入。</p>
 <h4 id="updatexml-的常规报错用法"><a href="#updatexml-的常规报错用法" class="headerlink" title="updatexml()的常规报错用法"></a>updatexml()的常规报错用法</h4><p><strong>payload ：</strong></p>
 <p> <em>‘ or updatexml(1,concat(‘#’,<strong>(select version() )</strong>,’#’),0)#</em></p>
 <p>下图使用火狐浏览器的插件Hackbar来提交post数据：</p>
-
+<img src="/2019/08/13/error-based-injection/1_4.png" title="pic4">
 
 <p>如下图，页面报错结果为：XPATH syntax error: ‘#5.5.53’。</p>
-<img src="/2019/08/13/error-based-injection/5.png" title="pic5">
+<img src="/2019/08/13/error-based-injection/1_5.png" title="pic5">
 
 
 
@@ -246,39 +247,78 @@
 <hr>
 <p>这里要插入<strong>子查询</strong>和<strong>派生表</strong>的概念。<strong>子查询</strong>有两种：一是WHERE子查询；二是FROM子查询，而FROM这种子查询又被称为<strong>派生表</strong>。</p>
 <hr>
-<p><strong>payload1:</strong> </p>
+<h4 id="实验前提：数据库为security-其中有一个users表，表中含字段username和password。"><a href="#实验前提：数据库为security-其中有一个users表，表中含字段username和password。" class="headerlink" title="实验前提：数据库为security,其中有一个users表，表中含字段username和password。"></a>实验前提：数据库为security,其中有一个users表，表中含字段username和password。</h4><p><strong>payload1:</strong> </p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or updatexml(1,concat(&apos;#&apos;,(select concat(id,&apos;#&apos;,username,&apos;#&apos;,password) from users limit 0,1)),0)#</span><br></pre></td></tr></table></figure>
 
-<img src="/2019/08/13/error-based-injection/6.png" title="pic6">
+<img src="/2019/08/13/error-based-injection/1_6.png" title="pic6">
 
 <p>结果：You can’t specify target table ‘users’ for update in FROM clause</p>
 <p>这里我试图查询users表中的id、username和password的第一行数据，但这里却弹出错误提醒。</p>
 <p>原因：根据报错意思，不能指定FROM子句中的users表来作为要UPDATE的表。完整的SQL语句如下：</p>
 <p>UPDATE users SET password = ‘<strong><em>‘ or updatexml(1,concat(‘#’,(select concat(id,’#’,username,’#’,password) from users limit 0,1)),0) #</em></strong> ‘ WHERE username=’$row1’</p>
 <p>解决方法：上述错误的具体的原理还不清楚，但是将select出的结果作为<strong>派生表</strong>（见下一个payload）再select一遍就没问题了，大家可以自己尝试一下。</p>
-<p>【注意：此问题只出现于MySQL，msSQL和Oracle不会出现此问题。】</p>
+<p>【<strong>注意</strong>】：此问题只出现于MySQL，msSQL和Oracle不会出现此问题。</p>
 <p> <strong>payload2:</strong></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or updatexml(1,concat(&apos;#&apos;,(select * from (select concat_ws(&apos;#&apos;,id,username,password) from users limit 0,1) a),&apos;#),0)#</span><br></pre></td></tr></table></figure>
 
-<img src="/2019/08/13/error-based-injection/7.png" title="pic7">
+<img src="/2019/08/13/error-based-injection/1_7.png" title="pic7">
 
-<p>结果：XPATH syntax error: ‘#1#Dumb#Dumb’，成功爆出数据（上面使用concat_ws()和concat()都可以）</p>
+<p>结果：XPATH syntax error: ‘#1#Dumb#Dumb’，成功爆出数据（上面其实使用concat_ws()和concat()都可以）。通   过改变关键字limit中的0便可以把表中的每一行数据暴出来。</p>
 <p>解释：这里的<strong>a</strong>：<strong>(select concat_ws(‘#’,id,username,password) from users limit 0,1)</strong>就是<strong>派生表</strong>，而select * from a就相当于查询a语句本身结果的内容。</p>
 <p>即“select concat_ws(‘#’,id,username,password) from users limit 0,1”等价于 “select * from a”。</p>
-<h5 id="若想一次性输出全部数据，则使用group-concat-。"><a href="#若想一次性输出全部数据，则使用group-concat-。" class="headerlink" title="若想一次性输出全部数据，则使用group_concat()。"></a>若想一次性输出全部数据，则使用group_concat()。</h5><p><strong>payload3：</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or updatexml(1,concat(&apos;#&apos;,(select * from (select group_concat(id,&apos;#&apos;,username,&apos;#&apos;,password) from users limit 0,1) a) ),0)#</span><br></pre></td></tr></table></figure>
+<h5 id="这里想一次性输出全部数据，故尝试使用group-concat-。"><a href="#这里想一次性输出全部数据，故尝试使用group-concat-。" class="headerlink" title="这里想一次性输出全部数据，故尝试使用group_concat( )。"></a>这里想一次性输出全部数据，故尝试使用group_concat( )。</h5><p><strong>payload3：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or updatexml(1,concat(&apos;#&apos;,(select * from (select group_concat(id,&apos;#&apos;,username,&apos;#&apos;,password) from users limit 0,1) a)),0)#</span><br></pre></td></tr></table></figure>
 
 <p>结果：XPATH syntax error: ‘#1#Dumb#Dumb,2#Angelina#I-kill-y’。可见，这里只能爆出来（显示）前两组数据，而且第二行数据的password没有完整显示出来（完整密码是I-kill-you）。</p>
-<p>【<strong>注意：updatexml()和extractvalue()这两个函数的报错返回长度有限,均为32个字符长度</strong>】</p>
+<p>【<strong>注意】updatexml( )和extractvalue( )这两个函数的报错返回长度有限,均为32个字符长度</strong></p>
 <p><strong>另外要警告的一点是</strong>：这里我尝试把limit 0,1改成limit 1,1，执行后发现password字段的<strong>数据全部清空了！！！</strong></p>
 <p>分析：</p>
-<p>首先，由于这里使用了group_concat()，查询出来的结果本来就一条数据（包含了全部数据的），这里的limit 0,1就是指第一条（仅有的一条数据），而limit 1,1是指第二条数据（不存在的，相当于NULL），所以结果就是select * from NULL。</p>
+<p>首先，由于这里使用了group_concat( )，查询出来的结果本来就一条数据（包含了全部数据的），这里的limit 0,1就是指第一条（仅有的一条数据），而limit 1,1是指第二条数据（不存在的，相当于NULL），所以结果就是select * from NULL。</p>
 <p>然后，因为<em>(select group_concat(id,’#’,username,’#’,password) from users limit 0,1) a</em>返回的就是NULL，导致<em>concat(‘#’,NULL,’#’)</em>返回的结果也是NULL，最后<em>updatexml(1,NULL,0)#</em>返回的也就是NULL。</p>
 <p>最后，<strong>UPDATE users SET password = ‘<em>‘ or NULL #</em> ‘ WHERE username=’$row1’</strong> 相当于</p>
 <p><strong>UPDATE users SET password = ‘’ or NULL</strong>，即把password字段的数据全部改为NULL，因为单引号中什么内容都没有所以密码数据全部被清空了。</p>
-<p>实际上，这里用了group_concat()本身就不用加Limit 0,1关键字了！</p>
-<p>【警告】<strong>updatexml()本身一个就是危险函数！！！</strong>请谨慎使用updatexml( )函数。</p>
-<h4 id="2、extractvalue-xml-document-Xpath-string"><a href="#2、extractvalue-xml-document-Xpath-string" class="headerlink" title="2、extractvalue(xml_document, Xpath_string)"></a>2、extractvalue(xml_document, Xpath_string)</h4><h4 id="3、floor-、rand-、count"><a href="#3、floor-、rand-、count" class="headerlink" title="3、floor()、rand()、count(*)"></a>3、floor()、rand()、count(*)</h4><p>Payload（floor()的用法）:</p>
+<p>实际上，这里用了group_concat( )本身就不用加Limit 0,1关键字了！</p>
+<p>【<strong>警告</strong>】<strong>updatexml()本身一个就是危险函数！！！</strong>请谨慎使用updatexml( )函数。</p>
+<h3 id="2、extractvalue-xml-document-xpath-string"><a href="#2、extractvalue-xml-document-xpath-string" class="headerlink" title="2、extractvalue(xml_document, xpath_string)"></a>2、extractvalue(xml_document, xpath_string)</h3><table>
+<thead>
+<tr>
+<th><strong>参数</strong></th>
+<th><strong>描述</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>xml_document</td>
+<td>xml_document是String格式，为XML文档对象的名称</td>
+</tr>
+<tr>
+<td>xpath_string</td>
+<td>xpath_string (xpath格式的字符串)</td>
+</tr>
+</tbody></table>
+<p>作用：从目标XML中返回包含所查询值的字符串。</p>
+<p>报错原理：这里和updatexml( )的报错原理一样，都属于xpath语法报错注入，也是第二个参数必须是xpath语法格式，所以我们可以在第二个参数输入我们想要查询的数据来进行报错注入。</p>
+<h4 id="updatexml-的常规报错用法-1"><a href="#updatexml-的常规报错用法-1" class="headerlink" title="updatexml( )的常规报错用法"></a>updatexml( )的常规报错用法</h4><p><strong>payload ：</strong></p>
+<p> <em>‘ or extractvalue(1,concat(‘<del>‘,<strong>(select version() )</strong>,’</del>‘))#</em></p>
+<p>上面的payload是extractvalue( )报错注入的常规模型，只需把加粗部分的内容改成想查看的数据的查询语句就能爆出想要的表中数据。</p>
+<p>extractvalue( )的用法与updatexml( )的用法一样，只要把上面的payload1、2、3中updatexml( )的前两个参数的内容输入到extractvalue( )的前两个参数中就可以了。原理都一样，所以具体的payload就不写出来了</p>
+<p>【<strong>再次提醒</strong>】<strong>updatexml( )和extractvalue( )这两个函数的报错返回长度有限,均为32个字符长度</strong></p>
+<h3 id="3、floor-、rand-、count"><a href="#3、floor-、rand-、count" class="headerlink" title="3、floor( )、rand( )、count(*)"></a>3、floor( )、rand( )、count(*)</h3><p> <strong>floor( )</strong>的作用：返回小于等于该参数值的最大整数,也可以理解为向下取整，只保留整数部分。</p>
+<p>示例如下：</p>
+<img src="/2019/08/13/error-based-injection/1_8.png" title="pic8">
+
+<p><strong>rand( )</strong>的作用：在0和1之间产生一个随机数。</p>
+<p>【注意】当rand( )中加入数字参数（暂且管它叫随机因子）后</p>
+<img src="/2019/08/13/error-based-injection/1_9.png" title="pic9">
+
+
+
+
+
+
+
+
+
+<p>Payload（floor()的用法）:</p>
 <p>‘ or (select 1 from (select count(<em>),concat_ws(‘-‘,(select concat_ws(‘-‘,id,username,password) from users limit 0,1),floor(rand()</em>2))as a from information_schema.tables group by a) b) where username=’admin’#</p>
 
 
