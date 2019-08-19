@@ -23,7 +23,7 @@
 
     <!--Open Graph Title-->
     
-        <meta property="og:title" content="error_based_injection">
+        <meta property="og:title" content="MySQL报错注入">
     
 
     <!--Open Graph Description-->
@@ -55,7 +55,7 @@
 
     <!-- Title -->
     
-    <title>error_based_injection - Lofi_Master</title>
+    <title>MySQL报错注入 - Lofi_Master</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
@@ -165,7 +165,7 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                 <div class="post-heading">
-                    <h1>error_based_injection</h1>
+                    <h1>MySQL报错注入</h1>
                     
                     <span class="meta">
                         <!-- Date and Author -->
@@ -196,12 +196,12 @@
                 <h1 id="MySQL报错注入"><a href="#MySQL报错注入" class="headerlink" title="MySQL报错注入"></a>MySQL报错注入</h1><p>这篇文章以sqli-labs-master平台的第17关Less17来说明报错注入的，这里主要讲解常见的三种报错注入方式，这种三种报错注入使用的报错注入函数分别为：floor()、updatexml()和extractvalue()。</p>
 <hr>
 <p>首先，我介绍一下Less17的情况，这一关是用update查询语句来重置用户密码的，打开less17页面后显示如下。</p>
-<p><img src="/.io//1.png" alt></p>
+<p><img src="/.io//1.png" alt="pic1"></p>
 <p>查看源代码发现后端对User Name的输入内容进行比较严格的过滤，所以我们选择在New Password的输入框中输入Payload。已知某一个用户为admin，其密码也为admin，所以我在两个输入框均输入admin，然后通过开启burp suite抓包再点击Submit按钮，得到如下请求包：</p>
-<img src="/.io//08/13/error-based-injection/2.png" width="1">
+<img src="/.io//08/13/error-based-injection/2.png" title="pic2">
 
 <p>由上可见，这里使用的post请求方式，post部分内容分别使用了uname、passwd和submit三个变量来提交数据，放行后页面如下，表示修改重置密码成功。</p>
-<p><img src="/.io//D:%5Cblog%5CLofiBlog%5Csource_posts%5Cerror-based-injection%5C3.png" alt></p>
+<p><img src="/.io//3.png" alt="pic3"></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$update=&quot;UPDATE users SET password = &apos;$passwd&apos; WHERE username=&apos;$row1&apos;&quot;;</span><br></pre></td></tr></table></figure>
 
 <p>上面是源代码中的SQL查询语句，对于update（或delete/insert）语句，我们可以通过<strong>or</strong>或者<strong>and</strong>布尔关键字衔接报错注入语句来构造一句完整的payload。</p>
@@ -231,10 +231,9 @@
 <h4 id="updatexml-的常规报错用法"><a href="#updatexml-的常规报错用法" class="headerlink" title="updatexml()的常规报错用法"></a>updatexml()的常规报错用法</h4><p><strong>payload ：</strong></p>
 <p> <em>‘ or updatexml(1,concat(‘#’,<strong>(select version() )</strong>,’#’),0)#</em></p>
 <p>下图使用火狐浏览器的插件Hackbar来提交post数据：</p>
-<img src="/.io//08/13/error-based-injection/4.jpg" width="4">
-
+<p><img src="/.io//4.png" alt="pic4"></p>
 <p>如下图，页面报错结果为：XPATH syntax error: ‘#5.5.53’。</p>
-<p><img src="/.io//5.jpg" alt="5"></p>
+<p><img src="/.io//5.png" alt="pic5"></p>
 <p>上面的payload是updatexml报错注入的常规模型，只需把加粗部分的内容改成想查看的数据的查询语句就能爆出想要的表中数据。</p>
 <hr>
 <p>这里要插入<strong>子查询</strong>和<strong>派生表</strong>的概念。<strong>子查询</strong>有两种：一是WHERE子查询；二是FROM子查询，而FROM这种子查询又被称为<strong>派生表</strong>。</p>
