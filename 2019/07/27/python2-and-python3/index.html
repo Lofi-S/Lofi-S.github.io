@@ -23,7 +23,7 @@
 
     <!--Open Graph Title-->
     
-        <meta property="og:title" content="Lofi_Master">
+        <meta property="og:title" content="Windows下同时安装了Python2和Python3">
     
 
     <!--Open Graph Description-->
@@ -36,7 +36,7 @@
 
     <!--Type page-->
     
-        <meta property="og:type" content="website">
+        <meta property="og:type" content="article">
     
 
     <!--Page Cover-->
@@ -55,7 +55,7 @@
 
     <!-- Title -->
     
-    <title>Archives: 2019 - Lofi_Master</title>
+    <title>Windows下同时安装了Python2和Python3 - Lofi_Master</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
@@ -157,88 +157,88 @@
 </nav>
 
     <!-- Main Content -->
-    
+    <!-- Page Header -->
+<!-- Set your background image for this header in your post front-matter: cover -->
 
-<!-- Page Header -->
-<!-- Set your background image for this header in the theme's configuration: index_cover -->
 <header class="intro-header" style="background-image: url('http://www.codeblocq.com/assets/projects/hexo-theme-clean-blog/img/home-bg.jpg')">
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                <div class="site-heading">
-                    <h1>2019</h1>
+                <div class="post-heading">
+                    <h1>Windows下同时安装了Python2和Python3</h1>
+                    
+                    <span class="meta">
+                        <!-- Date and Author -->
+                        
+                        
+                            2019-07-27
+                        
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 </header>
 
-<!-- Main Content -->
-<div class="container">
-    <div class="row">
-        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Tags and categories -->
+           
+
+            <!-- Gallery -->
             
-                <div class="post-preview">
-    <a href="/2019/08/13/error-based-injection/">
-        <h1 class="post-title archive">
-            MySQL报错注入
-        </h1>
-    </a>
-    <p class="post-meta archive">
-        <!-- Date and Author -->
-        
-        2019-08-13
-    </p>
-</div>
+
+            <!-- Post Main Content -->
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <h1 id="Windows下同时安装了Python2和Python3"><a href="#Windows下同时安装了Python2和Python3" class="headerlink" title="Windows下同时安装了Python2和Python3"></a>Windows下同时安装了Python2和Python3</h1><p>相信大家刚入门时都有这样的疑问：当我们的Windows操作系统上同时安装了Python2和Python3后，假如要运行一个Python2写的程序时，如何使该程序自动使用Python2的解释器而不是Python3的解释器来执行该程序呢？</p>
+<p>也许你可以直接添加Python2的安装路径到系统环境变量上面，这样就可以用Python2的解释器去执行该Python2的程序了，但前提是系统环境变量中这时候不能有Python3的安装路径。</p>
+<p>这样的话下次我们要执行Python3的程序的时候，又要把Python3的安装路径添加到系统环境变量中，而把之前添加的Python2的环境变量删除掉。因为如果不把Python2的环境变量去掉的话，<strong>由于系统是根据程序文件的后缀“.py”，按照环境变量的添加顺序去去选择解释器执行的</strong>，此时环境变量中Python2的顺序比Python3前，所以这个时候系统就会使用Python2的解释器去执行Python3的程序，然后就会出现错误。</p>
+<hr>
+<h3 id="解决步骤如下"><a href="#解决步骤如下" class="headerlink" title="解决步骤如下"></a>解决步骤如下</h3><p>1）安装完Python2和Python3之后先把文件夹名字分别改为py2和py3，然后都要把他们的路径添加到系统环境变量中，一般安装完Python的时候都会自动把安装路径添加到系统环境变量中。此时要确认一下，环境变量中都有Python2和Python3的安装路径（注意文件夹名已经改了，路径也要跟着修改）。</p>
+<img src="/2019/07/27/python2-and-python3/py_1.png" title="pic1">
+
+
+
+<p>2）Python安装完之后程序默认名为“python.exe”，此时要分别在py2和py3文件夹中把”python.exe“分别修改为”python2.exe“和”python3.exe“。</p>
+<img src="/2019/07/27/python2-and-python3/py_2.png" title="pic2">
+
+<img src="/2019/07/27/python2-and-python3/py_3.png" title="pic3">
+
+<p>3）在命令行中依次分别输入python、python2和python3。</p>
+<img src="/2019/07/27/python2-and-python3/py_4.png" title="pic4">
+
+<p>如图所示，这样已经可以分别运行Python2和Python3了。以后在执行Python2写的程序时只需要输入“python2  程序名xxx”就可以正常运行了。Python3也一样，只需在对应的Python3程序名前加python3+空格就可以了。</p>
+<img src="/2019/07/27/python2-and-python3/py_5.png" title="pic5">
+
+<hr>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><p>如果 Python2 和 Python3 同时有 pip（pip 是 Python 包管理工具，该工具提供了对Python 包的查找、下载、安装、卸载的功能），就不能直接使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install XXX</span><br></pre></td></tr></table></figure>
+
+<p>该命令来安装相应的模块了。</p>
+<p>而需要使用以下的命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python2 -m pip install XXX</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 -m pip install XXX</span><br></pre></td></tr></table></figure>
+
+
+
+                
+            </div>
+
+            <!-- Comments -->
             
-                <div class="post-preview">
-    <a href="/2019/08/11/reverse-shell/">
-        <h1 class="post-title archive">
-            反弹shell方式总结
-        </h1>
-    </a>
-    <p class="post-meta archive">
-        <!-- Date and Author -->
-        
-        2019-08-11
-    </p>
-</div>
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    
+
+
+                </div>
             
-                <div class="post-preview">
-    <a href="/2019/07/27/python2-and-python3/">
-        <h1 class="post-title archive">
-            Windows下同时安装了Python2和Python3
-        </h1>
-    </a>
-    <p class="post-meta archive">
-        <!-- Date and Author -->
-        
-        2019-07-27
-    </p>
-</div>
-            
-                <div class="post-preview">
-    <a href="/2019/07/13/middleware-parsing-vulnerability/">
-        <h1 class="post-title archive">
-            中间件解析漏洞
-        </h1>
-    </a>
-    <p class="post-meta archive">
-        <!-- Date and Author -->
-        
-        2019-07-13
-    </p>
-</div>
-            
-            <div class="archive-before-pagination"></div>
-            <ul class="pager">
-    
-    
-</ul>
         </div>
     </div>
-</div>
-
+</article>
 
     <!-- Footer -->
     <hr />
